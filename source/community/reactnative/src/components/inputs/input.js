@@ -291,29 +291,10 @@ export class Input extends React.Component {
 		if (this.isMultiline && action != Constants.InlineAction)
 			return;
 		this.setState({ showInlineActionErrors: true });
-		if (!this.props.isError && this.inlineAction.type === Constants.ActionSubmit) {
-			let actionObject = {
-				"type": Constants.ActionSubmit,
-				"title": this.inlineAction.title,
-				"data": this.state.text
-			};
-			onExecuteAction(actionObject, true);
-		} else if (!this.props.isError && this.inlineAction.type === Constants.ActionExecute) {
-			let actionObject = {
-				"type": Constants.ActionExecute,
-				"verb": this.inlineAction.verb,
-				"title": this.inlineAction.title,
-				"data": this.state.text
-			};
-			onExecuteAction(actionObject, true);
-		} else if (!this.props.isError && this.inlineAction.type === Constants.ActionOpenUrl) {
-			if (!Utils.isNullOrEmpty(this.inlineAction.url)) {
-				let actionObject = {
-					"type": Constants.ActionOpenUrl,
-					"url": this.inlineAction.url
-				};
-				onExecuteAction(actionObject, true);
-			}
+		if (!this.props.isError) {
+			let actionPayload = { ...this.inlineAction }
+			actionPayload.data = this.state.text;
+			onExecuteAction(actionPayload, true);
 		}
 	}
 }
