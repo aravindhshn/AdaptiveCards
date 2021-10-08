@@ -79,7 +79,7 @@ export const defaultThemeConfig = {
         borderWidth: 1,
         backgroundColor: Constants.WhiteColor,
         borderColor: Constants.LightGreyColor,
-        borderRadius: 5
+        borderRadius: 5,
     },
     inputTime: {
         width: Constants.FullWidth,
@@ -88,7 +88,7 @@ export const defaultThemeConfig = {
         borderWidth: 1,
         backgroundColor: Constants.WhiteColor,
         borderColor: Constants.LightGreyColor,
-        borderRadius: 5
+        borderRadius: 5,
     },
     radioButton: {
         width: 24,

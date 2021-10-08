@@ -122,11 +122,11 @@ export default class Renderer extends React.Component {
                     },
                     {
                         "name": "Andrew",
-                        "title": "Program Manager Lead Marketing Manager Area Executive"
+                        "title": "Program Manager II"
                     },
                     {
-                        "name": "Mary Anne Anna Jane Watson Brooklyn",
-                        "title": "Program Manager Lead Senior Manager Principal Executive Program Lead"
+                        "name": "Mary Anne",
+                        "title": "Program Manager"
                     }
                 ],
                 "stockName": "Microsoft Corp (NASDAQ: MSFT)",
