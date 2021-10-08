@@ -70,7 +70,8 @@ export const defaultThemeConfig = {
         borderColor: Constants.EmphasisColor,
         backgroundColor: Constants.WhiteColor,
         borderRadius: 5,
-        borderWidth: 1
+        borderWidth: 1,
+        placeholderTextColor: Constants.Grey300
     },
     inputDate: {
         width: Constants.FullWidth,
@@ -80,6 +81,7 @@ export const defaultThemeConfig = {
         backgroundColor: Constants.WhiteColor,
         borderColor: Constants.LightGreyColor,
         borderRadius: 5,
+        placeholderTextColor: Constants.Grey300
     },
     inputTime: {
         width: Constants.FullWidth,
@@ -89,6 +91,7 @@ export const defaultThemeConfig = {
         backgroundColor: Constants.WhiteColor,
         borderColor: Constants.LightGreyColor,
         borderRadius: 5,
+        placeholderTextColor: Constants.Grey300
     },
     radioButton: {
         width: 24,

@@ -150,6 +150,7 @@ const styles = StyleSheet.create({
 	textContainer: {
 		flexDirection: Constants.FlexRow,
 		backgroundColor: 'transparent',
+		marginVertical: 2
 	},
 	valueTextStyle: {
 		paddingLeft: 5,

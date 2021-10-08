@@ -62,6 +62,15 @@ export default class Renderer extends React.Component {
     customThemeConfig = {
         button: {
             backgroundColor: '#66BB6A'
+        // },
+        // input: {
+        //     placeholderTextColor: '#DCDCDC'
+        // },
+        // inputDate: {
+        //     placeholderTextColor: '#DCDCDC'
+        // },
+        // inputTime: {
+        //     placeholderTextColor: '#ACACAC'
         }
     }
 
@@ -112,11 +121,11 @@ export default class Renderer extends React.Component {
                     },
                     {
                         "name": "Andrew",
-                        "title": "Program Manager II"
+                        "title": "Program Manager Lead Marketing Manager Area Executive"
                     },
                     {
-                        "name": "Mary Anne",
-                        "title": "Program Manager"
+                        "name": "Mary Anne Anna Jane Watson Brooklyn",
+                        "title": "Program Manager Lead Senior Manager Principal Executive Program Lead"
                     }
                 ],
                 "stockName": "Microsoft Corp (NASDAQ: MSFT)",
