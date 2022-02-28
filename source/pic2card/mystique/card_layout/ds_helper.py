@@ -15,9 +15,8 @@ class DsHelper:
     - handles all utility functions needed for the layout generation
     """
 
-    CONTAINERS = ["columnset", "imageset", "column", "choiceset"]
-    MERGING_CONTAINERS_LIST = ["choiceset"]
-
+    CONTAINERS = ["columnset", "imageset", "column", "choiceset", "factset"]
+    MERGING_CONTAINERS_LIST = ['choiceset', 'factset']
     def __init__(self):
 
         self.serialized_layout = []
@@ -318,6 +317,15 @@ class DsDesignTemplate:
         """
         return {"choiceset": {"items": []}, "object": "choiceset"}
 
+    def factset(self, design_element: Dict) -> Dict:
+        """
+        Returns the design structure for the choice-set container
+        @param: design element
+        @return: design structure
+        """
+        return {"factset": {"items": []}, "object": "factset"}
+
+
 
 # pylint: disable=too-few-public-methods
 class ContainerTemplate:
@@ -346,6 +354,7 @@ class ContainerTemplate:
             "grouping_condition": condition,
             "order_key": 1,
         }
+        print('ehy card', card_layout)
         containers_group_object.merge_column_items(card_layout, merging_payload)
         items, _ = containers_group_object.collect_items_for_container(
             card_layout, 2
@@ -353,7 +362,68 @@ class ContainerTemplate:
         return containers_group_object.add_merged_items(
             items, card_layout, merging_payload
         )
+    
+    def factset(
+        self, card_layout: List[Dict], containers_group_object
+    ) -> List[Dict]:
+        """
+        Groups and returns the layout structure with the respective choice-sets
+        @param card_layout: Un-grouped layout structure.
+        @param containers_group_object: ContainerGroup object
+        @return: Grouped layout structure
+        """
+        
+        print(
+            'in factsettt set grouping', 'condito', '\ncard_layout_cond',card_layout
+        )
+        print('before merge column items', card_layout)
+        card_layout = self.form_factset(card_layout)
+        print(card_layout, 'mergeee')
+        return card_layout
 
+    def form_factset(self, card_layout):
+
+
+        factset_textbox = []
+        uuids = []
+        for data in card_layout:
+            if data.get('object', '') == 'columnset':
+                row_info = data.get('row', [])
+                textboxs = []
+                index_value = 0
+                previous_index_value = 0
+                for index, row in enumerate(row_info):
+                    if (index_value < 1 or previous_index_value == index+1) and  row['column']['items'][0]['object'] == 'textbox':
+                        if (textboxs and ((textboxs[0][1]-row['column']['items'][0]['coordinates'][1])<=10)) or not textboxs:
+                            coordinates = row['column']['items'][0]['coordinates']
+                            textboxs.append(coordinates)
+                            textboxs.append(row['column']['items'][0]['uuid'])
+                if len(textboxs)==4:
+                    previous_index_value = index
+                    factset_textbox.append(textboxs)
+                    textboxs=[]
+
+        uuids = []
+        for b in factset_textbox:
+            uuids.append(b[1])
+            uuids.append(b[3])
+        updated_card_layout_new = []
+        for data in card_layout:#updating card layout with factset
+            if data.get('object', '') == 'columnset':
+                row_info = data.get('row', [])
+                for index, row in enumerate(row_info):
+                    if row['column']['items'][0]['object'] == 'textbox' and  row['column']['items'][0]['uuid'] in uuids:
+                        row_info[index]['column']['items'][0]['object']='factset'
+                        # row_info[index]['column']['factset']= row_info[index]['column']['items']
+                        # row_info[index]['column'].pop('items', None)
+                data['row'] = row_info
+                updated_card_layout_new.append(data)
+            else:
+                updated_card_layout_new.append(data)
+        if updated_card_layout_new:
+            return updated_card_layout_new
+        else:
+            return card_layout
 
 class ContainerDetailTemplate:
     """
