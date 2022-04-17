@@ -102,6 +102,28 @@ class AdaptiveCardTemplate:
             ],
         }
 
+    def factset_data(self, design_object: Dict) -> Dict:
+        """
+        Returns the design json for the radiobutton
+        @param: design element
+        @return: design object
+        """
+        fact_set = {
+            "type": "FactSet",
+            "facts": [],
+            "style": "expanded",
+        }
+        item = {
+            "title": design_object.get("data", ""),
+            "value": design_object.get("factset_value", {}).get('data', ''),
+            "horizontalAlignment": design_object.get(
+                "horizontal_alignment", ""
+            )
+        }
+        fact_set["facts"].append(item)
+        return fact_set
+
+
     def radiobutton(self, design_object: Dict) -> Dict:
         """
         Returns the design json for the radiobutton
@@ -190,6 +212,20 @@ class AdaptiveCardTemplate:
             "type": "Input.ChoiceSet",
             "choices": [],
             "style": "expanded",
+            "horizontalAlignment": design_object.get(
+                "horizontal_alignment", ""
+            ),
+        }
+
+    def factset(self, design_object: Dict) -> Dict:
+        """
+        Returns the design json for the fact set container
+        @param: design element
+        @return: design object
+        """
+        return {
+            "type": "FactSet",
+            "facts": [],
             "horizontalAlignment": design_object.get(
                 "horizontal_alignment", ""
             ),

@@ -64,8 +64,27 @@ class AcContainerExport:
         template_object = getattr(
             self.object_template, self.design_object.get("object", "")
         )
+        print(template_object, 'this is template_object')
         body.append(template_object(self.design_object))
+        print(body, 'in body')
         # body = body[-1].get("choices", [])
+        print(self.design_object.get("choiceset", {}).get("items", []), 'jjj')
         self.export_object.export_card_body(
             body, self.design_object.get("choiceset", {}).get("items", [])
+        )
+
+    def factset(self, body) -> None:
+        """
+        Returns the design element template for the choice-set container
+        @param body: design element's layout structure
+        """
+        template_object = getattr(
+            self.object_template, self.design_object.get("object", "")
+        )
+        body.append(template_object(self.design_object))
+        print(self.design_object.get("factset", {}).get("items", []), 'in facts data')
+        data = self.design_object.get("factset", {}).get("items", [])
+        print(self.export_object, '\ndesignobhhhhh')
+        self.export_object.export_card_body(
+            body, self.design_object.get("factset", {}).get("items", []),
         )

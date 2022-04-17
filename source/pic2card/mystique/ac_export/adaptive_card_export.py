@@ -63,9 +63,14 @@ class AdaptiveCardExport:
             isinstance(design_object, dict)
             and design_object.get("object", "") not in DsHelper.CONTAINERS
         ):
-            template_object = getattr(
-                self.object_template, design_object.get("object", "")
-            )
+            if design_object.get('type', '') == 'factset_key':
+                template_object = getattr(
+                    self.object_template, 'factset_data'
+                )
+            else:
+                template_object = getattr(
+                    self.object_template, design_object.get("object", "")
+                )
             card_template = template_object(design_object)
             if (
                 body
@@ -73,6 +78,12 @@ class AdaptiveCardExport:
                 and body[-1].get("type") == "Input.ChoiceSet"
             ):
                 body[-1]["choices"].append(card_template["choices"][0])
+            elif (
+                body
+                and design_object.get("type") == "factset_key"
+                and body[-1].get("type") == "FactSet"
+            ):
+                body[-1]["facts"].append(card_template["facts"][0])
             else:
                 body.append(card_template)
         elif isinstance(design_object, list):
