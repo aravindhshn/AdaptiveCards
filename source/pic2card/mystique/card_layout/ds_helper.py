@@ -469,6 +469,7 @@ class ContainerTemplate:
                                 index_flag+=1
                     if len(textbox_item)==2:
                         textbox_item[0].update({'type': 'factset_key'})
+                        textbox_item[0].update({'factset_value': textbox_item[1]})
                         textbox_item[1].update({'type': 'factset_value'})
                         if len(self.factset_items)==0:
                             self.first_columnset_index = index
