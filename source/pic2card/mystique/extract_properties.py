@@ -460,7 +460,7 @@ class ContainerProperties:
 
         elif (
             isinstance(design_object, dict)
-            and design_object.get("object", "") in DsHelper.CONTAINERS[:-1]
+            and design_object.get("object", "") in DsHelper.CONTAINERS[:-2]
         ):
 
             container_objects = getattr(
