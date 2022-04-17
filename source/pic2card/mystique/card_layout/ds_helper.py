@@ -7,7 +7,7 @@ from typing import List, Tuple, Dict, Union
 import pandas as pd
 
 from .objects_group import ChoicesetGrouping
-
+import copy
 
 class DsHelper:
     """
@@ -15,8 +15,8 @@ class DsHelper:
     - handles all utility functions needed for the layout generation
     """
 
-    CONTAINERS = ["columnset", "imageset", "column", "choiceset", "factset"]
-    MERGING_CONTAINERS_LIST = ['choiceset', 'factset']
+    CONTAINERS = ["columnset", "imageset", "column",  'choiceset', 'factset' ]
+    MERGING_CONTAINERS_LIST = [ 'choiceset', 'factset']
     def __init__(self):
 
         self.serialized_layout = []
@@ -335,7 +335,11 @@ class ContainerTemplate:
     - Handles the functionalies needed for different type of container
     groupings.
     """
-
+    def __init__(self):
+        self.factset_items = []
+        self.first_columnset_index = ''
+        self.factset_row_index = ''
+    
     def choiceset(
         self, card_layout: List[Dict], containers_group_object
     ) -> List[Dict]:
@@ -354,7 +358,6 @@ class ContainerTemplate:
             "grouping_condition": condition,
             "order_key": 1,
         }
-        print('ehy card', card_layout)
         containers_group_object.merge_column_items(card_layout, merging_payload)
         items, _ = containers_group_object.collect_items_for_container(
             card_layout, 2
@@ -372,58 +375,108 @@ class ContainerTemplate:
         @param containers_group_object: ContainerGroup object
         @return: Grouped layout structure
         """
-        
-        print(
-            'in factsettt set grouping', 'condito', '\ncard_layout_cond',card_layout
-        )
-        print('before merge column items', card_layout)
-        card_layout = self.form_factset(card_layout)
-        print(card_layout, 'mergeee')
+        import itertools
+        self.detect_factset_items(card_layout)
+        self.factset_items = list(itertools.chain.from_iterable(self.factset_items))
+        if len(self.factset_items)%2==0 and self.factset_items:
+            card_layout = self.update_cards_layout(card_layout)
+            print('update_car_layout', card_layout)
+            card_layout = self.arrange_card_layout(card_layout)
+            print('arrange_CAR_LAYOUT', card_layout)
         return card_layout
 
-    def form_factset(self, card_layout):
+    def arrange_card_layout(self,card_layout):
+        second_columnset_index = self.first_columnset_index+1
+        new_card_layout = copy.deepcopy(card_layout)
+        items_removed = 0
+        for layout, index in zip(card_layout[second_columnset_index:], range(second_columnset_index, len(card_layout))):
+            rows=layout.get('row', [])
+            flag=0
+            for row in rows:
+                if row['column']['items'][0] in self.factset_items:
+                    flag+=1
+            if flag==2 and len(rows)==2:
+                if items_removed:
+                    index=index-items_removed
+                new_card_layout.pop(index)
+                items_removed+=1
+        return new_card_layout
 
 
-        factset_textbox = []
-        uuids = []
-        for data in card_layout:
-            if data.get('object', '') == 'columnset':
-                row_info = data.get('row', [])
-                textboxs = []
-                index_value = 0
-                previous_index_value = 0
-                for index, row in enumerate(row_info):
-                    if (index_value < 1 or previous_index_value == index+1) and  row['column']['items'][0]['object'] == 'textbox':
-                        if (textboxs and ((textboxs[0][1]-row['column']['items'][0]['coordinates'][1])<=10)) or not textboxs:
-                            coordinates = row['column']['items'][0]['coordinates']
-                            textboxs.append(coordinates)
-                            textboxs.append(row['column']['items'][0]['uuid'])
-                if len(textboxs)==4:
-                    previous_index_value = index
-                    factset_textbox.append(textboxs)
-                    textboxs=[]
 
-        uuids = []
-        for b in factset_textbox:
-            uuids.append(b[1])
-            uuids.append(b[3])
-        updated_card_layout_new = []
-        for data in card_layout:#updating card layout with factset
-            if data.get('object', '') == 'columnset':
-                row_info = data.get('row', [])
-                for index, row in enumerate(row_info):
-                    if row['column']['items'][0]['object'] == 'textbox' and  row['column']['items'][0]['uuid'] in uuids:
-                        row_info[index]['column']['items'][0]['object']='factset'
-                        # row_info[index]['column']['factset']= row_info[index]['column']['items']
-                        # row_info[index]['column'].pop('items', None)
-                data['row'] = row_info
-                updated_card_layout_new.append(data)
-            else:
-                updated_card_layout_new.append(data)
-        if updated_card_layout_new:
-            return updated_card_layout_new
-        else:
-            return card_layout
+    def get_factset_coordinates(self, factset_items):
+        for item in factset_items:
+            coordinates  = item['coordinates']
+            xmin,ymin, xmax, ymax = '', '', '', ''
+            if not xmin and not ymin and not xmax and not ymax:
+                xmin=coordinates[0]
+                ymin=coordinates[1]
+                xmax=coordinates[2]
+                ymax=coordinates[3]
+            elif coordinates[0]<xmin:
+                xmin=coordinates[0]
+            elif coordinates[1]<ymin:
+                ymin=coordinates[1]
+            elif coordinates[2]>xmax:
+                xmax=coordinates[2]
+            elif coordinates[3]>ymin:
+                ymax=coordinates[3]
+        return xmin, ymin, xmax, ymax
+
+
+    def update_cards_layout(self, card_layout):
+        factset_layout = card_layout[self.first_columnset_index]
+        xmin, ymin, xmax, ymax = self.get_factset_coordinates(self.factset_items)
+        index_found = ''          
+        if  factset_layout.get('object', '')=='columnset':
+            rows = factset_layout.get('row', [])
+            for index, row in zip(range(len(rows)),rows):
+                if row.get('column', {}).get('items', []):
+                    if self.factset_items[0]==row.get('column', {}).get('items', [{}])[0]:
+                        if not isinstance(index_found, int):
+                            index_found = index
+                        card_layout[self.first_columnset_index]['row'][index]['column']['items']=self.factset_items
+                        factset_card_layout={"object": "factset", "factset":{"items":self.factset_items},"coordinates":[xmin, ymin, xmax, ymax]}
+                        card_layout[self.first_columnset_index]['row'][index]['column']['items']=[factset_card_layout]
+                        card_layout[self.first_columnset_index]['row'][index]['coordinates']=[xmin, ymin, xmax, ymax]
+                        if len(rows)==2:
+                            card_layout[self.first_columnset_index]['row']=[card_layout[self.first_columnset_index]['row'][0]]
+                            card_layout[self.first_columnset_index]['coordinates']=[xmin, ymin, xmax, ymax]
+        # if len(rows)>2:
+        #     card_layout[self.first_columnset_index]['row'].pop(index_found)
+        return card_layout
+
+    def detect_factset_items(self, design_obj, index=''):
+        if isinstance(design_obj, dict):
+            if design_obj.get('object', '')=='columnset':
+                rows = design_obj.get('row', [])
+                if len(rows) >= 2:
+                    textbox_item=[]
+                    index_flag=0
+                    for ind, row in zip(range(len(rows)),rows):
+                        if row.get('object', '') == 'column' and len(row['column']['items'])==1:
+                            item = row['column']['items'][0]
+                            if item.get('object', '')=='textbox':
+                                if not isinstance (self.first_columnset_index, int):
+                                    self.first_columnset_index = index
+                                if index_flag==0:
+                                    textbox_item.append(item)
+                                elif index_flag==ind:
+                                    textbox_item.append(item)
+                                    print(textbox_item)
+                                else:
+                                    textbox_item = []
+                                index_flag+=1
+                    if len(textbox_item)==2:
+                        textbox_item[0].update({'type': 'factset_key'})
+                        textbox_item[1].update({'type': 'factset_value'})
+                        if len(self.factset_items)==0:
+                            self.first_columnset_index = index
+                        self.factset_items.append(textbox_item)             
+        elif isinstance(design_obj, list):
+            for design, index in zip(design_obj,range(len(design_obj))) :
+                self.detect_factset_items(design, index)
+
 
 class ContainerDetailTemplate:
     """
@@ -470,3 +523,12 @@ class ContainerDetailTemplate:
         @returns: list of elements inside the given choice-set
         """
         return design_element.get("choiceset", {}).get("items", [])
+
+    def factset(self, design_element: Dict) -> List:
+        """
+        Returns the design objects of a fact-set container for the given
+        layout structure.
+        @param design_element: design element
+        @returns: list of elements inside the given fact-set
+        """
+        return design_element.get("factset", {}).get("items", [])
