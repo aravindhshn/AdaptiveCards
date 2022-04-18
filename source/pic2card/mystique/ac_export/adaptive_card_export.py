@@ -88,7 +88,8 @@ class AdaptiveCardExport:
                 body.append(card_template)
         elif isinstance(design_object, list):
             for design_obj in design_object:
-                self.export_card_body(body, design_obj)
+                if design_obj.get('type', '') != 'factset_value':
+                    self.export_card_body(body, design_obj)
         else:
             ac_containers = AcContainerExport(design_object, self)
             ac_containers_object = getattr(
